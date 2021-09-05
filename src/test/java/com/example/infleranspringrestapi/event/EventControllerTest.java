@@ -1,7 +1,9 @@
 package com.example.infleranspringrestapi.event;
 
+import com.example.infleranspringrestapi.common.TestDescription;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +35,8 @@ public class EventControllerTest {
     ObjectMapper objectMapper;
 
     @Test
+    @DisplayName("정상적으로 이벤트를 생성하는 테스트")
+    @TestDescription("정상적으로 이벤트를 생성하는 테스트") // Junit5에서 @DisplayName으로 변경하면 된다.
     public void createEvent() throws Exception {
         EventDto event = EventDto.builder()
                 .name("Spring")
@@ -100,6 +104,7 @@ public class EventControllerTest {
     }
 
     @Test
+    @TestDescription("입력값이 잘못된 경우에 에러가 발생하는 테스트")
     public void createEvent_Bad_Request_Wrong_Input() throws Exception {
         EventDto eventDto = EventDto.builder()
                 .name("Spring")
