@@ -34,5 +34,5 @@ public class Event {
     private boolean offline;
     private boolean free;
     @Enumerated(EnumType.STRING)
-    private EventStatus status;
+    private EventStatus eventStatus = EventStatus.DRAFT;
 }
