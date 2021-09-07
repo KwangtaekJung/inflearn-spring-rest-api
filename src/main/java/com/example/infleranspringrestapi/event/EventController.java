@@ -2,7 +2,10 @@ package com.example.infleranspringrestapi.event;
 
 import org.aspectj.asm.IModelFilter;
 import org.modelmapper.ModelMapper;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Errors;
@@ -44,9 +47,15 @@ public class EventController {
         Event event = modelMapper.map(eventDto, Event.class);
         event.update();
         Event newEvent = eventRepository.save(event);
+
 //      URI createdUri = linkTo(EventController.class).slash("{id}").toUri();
-        URI createdUri = linkTo(EventController.class).slash(newEvent.getId()).toUri();
-        event.setId(10);
-        return ResponseEntity.created(createdUri).body(event);
+        WebMvcLinkBuilder linkBuilder = linkTo(EventController.class).slash(newEvent.getId());
+
+        EntityModel<Event> model = EntityModel.of(newEvent);
+        model.add(linkBuilder.withSelfRel());
+        model.add(linkBuilder.withRel("query-events"));
+        model.add(linkBuilder.withRel("update-event"));
+
+        return ResponseEntity.created(linkBuilder.toUri()).body(model);
     }
 }
