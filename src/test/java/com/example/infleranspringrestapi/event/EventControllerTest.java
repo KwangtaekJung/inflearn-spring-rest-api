@@ -62,7 +62,8 @@ public class EventControllerTest {
                 .andExpect(header().string("Content-Type", "application/hal+json"))
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE))  // 좀 더 type safe 한 방법
                 .andExpect(jsonPath("id").value(Matchers.not(100)))
-                .andExpect(jsonPath("free").value(Matchers.not(true)))
+                .andExpect(jsonPath("free").value(false))
+                .andExpect(jsonPath("offline").value(true))
                 .andExpect(jsonPath("eventStatus").value(EventStatus.DRAFT.name()));
     }
 
