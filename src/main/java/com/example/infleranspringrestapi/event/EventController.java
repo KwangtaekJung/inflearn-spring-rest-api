@@ -55,6 +55,7 @@ public class EventController {
         model.add(linkBuilder.withSelfRel());
         model.add(linkBuilder.withRel("query-events"));
         model.add(linkBuilder.withRel("update-event"));
+        model.add(linkTo(EventController.class).slash("docs/index.html#resources-events-create").withRel("profile"));
 
         return ResponseEntity.created(linkBuilder.toUri()).body(model);
     }
