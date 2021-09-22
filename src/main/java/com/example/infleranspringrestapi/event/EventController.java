@@ -1,5 +1,6 @@
 package com.example.infleranspringrestapi.event;
 
+import com.example.infleranspringrestapi.index.IndexController;
 import org.aspectj.asm.IModelFilter;
 import org.modelmapper.ModelMapper;
 import org.springframework.hateoas.EntityModel;
@@ -36,12 +37,15 @@ public class EventController {
     @PostMapping
     public ResponseEntity createEvent(@RequestBody @Valid EventDto eventDto, Errors errors) {
         if (errors.hasErrors()) {
-            return ResponseEntity.badRequest().body(errors);
+            EntityModel<Errors> errorsEntityModel = EntityModel.of(errors);
+            errorsEntityModel.add(linkTo(methodOn(IndexController.class).index()).withRel("index"));
+            return ResponseEntity.badRequest().body(errorsEntityModel);
         }
 
         eventValidator.validate(eventDto, errors);
         if (errors.hasErrors()) {
-            return ResponseEntity.badRequest().body(errors);
+            // 위의 내용과 실제 구현 내용은 동일함.
+            return ResponseEntity.badRequest().body(ErrorsResource.modelOf(errors));
         }
 
         Event event = modelMapper.map(eventDto, Event.class);
