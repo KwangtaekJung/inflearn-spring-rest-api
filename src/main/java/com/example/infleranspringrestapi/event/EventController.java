@@ -18,6 +18,7 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -90,7 +91,38 @@ public class EventController {
         Event event = optionalEvent.get();
         EntityModel<Event> entityModel = EntityModel.of(event);
         entityModel.add(linkTo(EventController.class).withSelfRel());
+        entityModel.add(linkTo(EventController.class).withRel("update-event"));
         entityModel.add(linkTo(EventController.class).slash("docs/index.html#resources-events-get").withRel("profile"));
+
+        return ResponseEntity.ok(entityModel);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateEvent(@PathVariable Integer id,
+                                      @RequestBody @Valid EventDto eventDto,
+                                      Errors errors) {
+        Optional<Event> optionalEvent = this.eventRepository.findById(id);
+        if (optionalEvent.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        if (errors.hasErrors()) {
+            return ResponseEntity.badRequest().body(ErrorsResource.modelOf(errors));
+        }
+
+        this.eventValidator.validate(eventDto, errors);
+        if (errors.hasErrors()) {
+            return ResponseEntity.badRequest().body(ErrorsResource.modelOf(errors));
+        }
+
+        Event existingEvent = optionalEvent.get();
+        this.modelMapper.map(eventDto, existingEvent);
+        Event savedEvent = this.eventRepository.save(existingEvent);
+
+        EntityModel<Event> entityModel = EntityModel.of(savedEvent);
+        entityModel.add(linkTo(EventController.class).withSelfRel());
+        entityModel.add(linkTo(EventController.class).withRel("query-events"));
+        entityModel.add(linkTo(EventController.class).slash("docs/index.html#resources-events-update").withRel("profile"));
 
         return ResponseEntity.ok(entityModel);
     }
