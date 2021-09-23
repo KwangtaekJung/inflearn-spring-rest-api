@@ -16,12 +16,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.validation.Valid;
 import java.net.URI;
+import java.util.Optional;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -76,5 +78,20 @@ public class EventController {
         PagedModel<EntityModel<Event>> entityModels = assembler.toModel(page, EventResource::new);
         entityModels.add(linkTo(EventController.class).slash("docs/index.html#resources-events-list").withRel("profile"));
         return ResponseEntity.ok(entityModels);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<EntityModel<Event>> getEvent(@PathVariable Integer id) {
+        Optional<Event> optionalEvent = this.eventRepository.findById(id);
+        if (optionalEvent.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Event event = optionalEvent.get();
+        EntityModel<Event> entityModel = EntityModel.of(event);
+        entityModel.add(linkTo(EventController.class).withSelfRel());
+        entityModel.add(linkTo(EventController.class).slash("docs/index.html#resources-events-get").withRel("profile"));
+
+        return ResponseEntity.ok(entityModel);
     }
 }
