@@ -2,23 +2,23 @@ package com.example.infleranspringrestapi.accounts;
 
 import org.hamcrest.Matchers;
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Set;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
-import static org.assertj.core.api.Assertions.*;
-
+@RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
-class AccountServiceTest {
+public class AccountServiceTestJunit4 {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -29,36 +29,31 @@ class AccountServiceTest {
     @Autowired
     AccountRepository accountRepository;
 
-    @Test
-    public void findByUsername() {
-        //given
-        String password = "keesun";
-        String username = "keesun@email.com";
-        Account account = Account.builder()
-                .email(username)
-                .password(password)
-                .roles(Set.of(AccountRole.ADMIN, AccountRole.USER))
-                .build();
-        this.accountRepository.save(account);
-
-        //when
-        UserDetailsService userDetailsService = (UserDetailsService) accountService;
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-        //then
-        assertThat(userDetails.getPassword()).isEqualTo(password);
+    @Test(expected = UsernameNotFoundException.class)
+    public void findByUserByEmail() {
+        String username = "random@email.com";
+        accountService.loadUserByUsername(username);
     }
 
     @Test
-    public void findByUsernameFail_TryCatch() {
+    public void findByUserByEmail_TryCatch() {
         String username = "random@email.com";
 
         try {
             accountService.loadUserByUsername(username);
             fail("supposed to be failed");
         } catch (UsernameNotFoundException e) {
-                assertThat(e.getMessage()).containsSequence(username);
+            assertThat(e.getMessage()).containsSequence(username);
         }
+    }
+
+    @Test
+    public void findByUserEmail_Rule() {
+        String username = "random@email.com";
+        expectedException.expect(UsernameNotFoundException.class);
+        expectedException.expectMessage(Matchers.containsString(username));
+
+        accountService.loadUserByUsername(username);
     }
 
     @Test
